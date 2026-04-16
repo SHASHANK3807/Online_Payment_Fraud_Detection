@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual Authorization | FraudGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <style>
+        .dual-card {
+            max-width: 600px;
+        }
+
+        .auth-panel {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-panel::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .auth-panel.trusted::after {
+            background: var(--warning);
+        }
+
+        .step-badge {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+
+        .otp-input-field {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            font-size: 1.5rem;
+            font-family: monospace;
+            text-align: center;
+            letter-spacing: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .otp-input-field:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .emergency-downtime {
+            background: rgba(244, 63, 94, 0.05);
+            border: 1px dashed rgba(244, 63, 94, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 35px;
+            text-align: center;
+        }
+
+        .error-toast {
+            background: rgba(244, 63, 94, 0.1);
+            color: #fb7185;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🔐</div>
+            <h1>Multi-Factor Protocol</h1>
+            <p>Dual-Node Authorization Required</p>
+        </div>
+    </div>
+
+    <div class="container dual-card">
+        <div class="card" style="padding: 50px 40px;">
+            <div style="text-align: center; margin-bottom: 35px;">
+                <div style="font-size: 3rem; margin-bottom: 15px; color: var(--primary);">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 10px;">Security Verification</h2>
+                <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">
+                    Total Sum: <span style="color: white; font-weight: 700;">₹{{ "{:,.2f}".format(amount) }}</span><br>
+                    To: <span style="color: white; font-weight: 700;">{{ receiver }}</span>
+                </p>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <div class="error-toast">
+                <i class="fas fa-exclamation-triangle" style="margin-right: 10px;"></i> {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('verify_dual_otp', txn_id=txn_id) }}" method="POST">
+                
+                <div class="auth-panel">
+                    <span class="step-badge">NODE 01: SENDER</span>
+                    <h3 style="font-size: 1rem; color: white; margin-bottom: 5px;">Primary Authorization</h3>
+                    <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px;">Enter the 4-digit synchronization key sent to your terminal.</p>
+                    <input type="text" name="sender_otp" class="otp-input-field" placeholder="0000" maxlength="4" required autocomplete="off">
+                </div>
+
+                <div class="auth-panel trusted">
+                    <span class="step-badge" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">NODE 02: GUARDIAN</span>
+                    <h3 style="font-size: 1rem; color: white; margin-bottom: 5px;">Trusted Contact Authorization</h3>
+                    <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px;">Coordinate with <strong style="color: var(--warning);">{{ trusted_contact }}</strong> to retrieve their verification key.</p>
+                    <input type="text" name="trusted_otp" class="otp-input-field" placeholder="0000" maxlength="4" required autocomplete="off">
+                </div>
+
+                <button type="submit" class="btn-premium" style="height: 65px;">
+                    INITIALIZE SETTLEMENT <i class="fas fa-check-double" style="margin-left: 12px; font-size: 0.9rem;"></i>
+                </button>
+            </form>
+
+            <div class="emergency-downtime">
+                <h4 style="color: #fb7185; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.1em;">
+                    <i class="fas fa-ambulance" style="margin-right: 8px;"></i> Emergency Protocols
+                </h4>
+                <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5;">
+                    If this transaction is medically or logistically urgent, you may attempt a single-node identity override.
+                </p>
+                <a href="{{ url_for('emergency_options', txn_id=txn_id) }}" class="btn-premium" style="background: var(--danger); font-size: 0.85rem; height: 50px;">
+                    EXECUTE EMERGENCY BYPASS
+                </a>
+            </div>
+
+            <div style="margin-top: 35px; text-align: center;">
+                <a href="/transaction" style="color: #64748b; text-decoration: none; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em;">
+                    <i class="fas fa-times"></i> ABORT TRANSACTION
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

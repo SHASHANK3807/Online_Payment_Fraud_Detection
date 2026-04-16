@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardian Review | FraudGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <style>
+        .review-container {
+            max-width: 650px;
+        }
+
+        .summary-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            border-radius: 24px;
+            margin: 30px 0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .summary-value {
+            color: white;
+            font-weight: 700;
+        }
+
+        .scam-defense {
+            background: rgba(244, 63, 94, 0.05);
+            border: 1px dashed rgba(244, 63, 94, 0.3);
+            padding: 25px;
+            border-radius: 20px;
+            margin: 30px 0;
+        }
+
+        .scam-defense h4 {
+            color: #fb7185;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .scam-list {
+            list-style: none;
+            padding: 0;
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .scam-list li {
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+            line-height: 1.4;
+        }
+
+        .scam-list i {
+            color: #fb7185;
+            margin-top: 3px;
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-reject {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            margin-top: 15px;
+            box-shadow: none;
+        }
+
+        .btn-reject:hover {
+            background: rgba(244, 63, 94, 0.1);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">👤</div>
+            <h1>Guardian Review</h1>
+            <p>Verification Link: <span style="color: white; font-weight: 700;">SECURE</span></p>
+        </div>
+    </div>
+
+    <div class="container review-container">
+        <div class="card" style="padding: 50px 40px;">
+            
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <div style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(99, 102, 241, 0.2); text-align: center;">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            {% if not transaction.cosigner_approved %}
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 10px;">Authorization Request</h2>
+                    <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">
+                        <strong style="color: white;">{{ user.username }}</strong> has identified you as their Trusted Guardian. A high-volume settlement requires your explicit authorization.
+                    </p>
+                </div>
+
+                <div class="summary-box">
+                    <div class="summary-row">
+                        <span class="summary-label">Primary Node:</span>
+                        <span class="summary-value">{{ user.username }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Target Recipient:</span>
+                        <span class="summary-value" style="font-family: monospace;">{{ transaction.receiver_email }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Settlement Sum:</span>
+                        <span class="summary-value" style="color: var(--accent); font-size: 1.2rem;">₹{{ "{:,.2f}".format(transaction.amount) }}</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Timestamp:</span>
+                        <span class="summary-value" style="font-size: 0.85rem;">{{ transaction.timestamp.strftime('%d %b %Y - %H:%M') }}</span>
+                    </div>
+                </div>
+
+                <div class="scam-defense">
+                    <h4><i class="fas fa-shield-virus"></i> Anti-Fraud Protocol</h4>
+                    <ul class="scam-list">
+                        <li><i class="fas fa-check-circle"></i> Verify via direct voice communication before proceeding.</li>
+                        <li><i class="fas fa-check-circle"></i> Confirm absence of remote desktop or pressure tactics.</li>
+                        <li><i class="fas fa-check-circle"></i> Terminate if the sender appears coerced or confused.</li>
+                    </ul>
+                </div>
+
+                <form method="POST">
+                    <button type="submit" name="action" value="approve" class="btn-premium btn-approve">
+                        AUTHORIZE SETTLEMENT <i class="fas fa-check-circle" style="margin-left: 10px;"></i>
+                    </button>
+                    <button type="submit" name="action" value="reject" class="btn-premium btn-reject">
+                        TERMINATE TRANSACTION <i class="fas fa-times-circle" style="margin-left: 10px;"></i>
+                    </button>
+                </form>
+            {% else %}
+                <div style="text-align: center; padding: 40px 0;">
+                    <div style="font-size: 4.5rem; color: var(--accent); margin-bottom: 25px; filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.3));">
+                        <i class="fas fa-circle-check"></i>
+                    </div>
+                    <h2 style="font-size: 1.8rem; font-weight: 800;">Protocol Finalized</h2>
+                    <p style="color: #94a3b8; margin-top: 15px; font-size: 1rem;">This transaction has already received authorization from a verified guardian.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>

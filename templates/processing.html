@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Securing Transaction - FraudGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <style>
+        .processing-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            padding: 20px;
+        }
+
+        .glass-processing-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            padding: 60px 40px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: cardFadeIn 0.8s ease-out;
+        }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .ai-scanner {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .shield-icon {
+            font-size: 80px;
+            color: #6366f1;
+            filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.4));
+            z-index: 1;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #818cf8, transparent);
+            box-shadow: 0 0 15px #818cf8;
+            z-index: 2;
+            animation: scanning 2s linear infinite;
+        }
+
+        @keyframes scanning {
+            0% {
+                top: 0;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
+        }
+
+        .analysis-status h2 {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .analysis-status p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .amount-badge {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 8px 20px;
+            border-radius: 50px;
+            color: #818cf8;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        .process-steps {
+            text-align: left;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+
+        .step.active {
+            opacity: 1;
+            color: #818cf8;
+        }
+
+        .step i {
+            font-size: 0.9rem;
+        }
+
+        .pulse {
+            animation: pulse-animation 2s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+        }
+    </style>
+</head>
+
+<body class="processing-container">
+
+    <div class="glass-processing-card">
+        <div class="ai-scanner">
+            <i class="fas fa-shield-alt shield-icon pulse"></i>
+            <div class="scan-line"></div>
+        </div>
+
+        <div class="analysis-status">
+            <h2>Analyzing Risk</h2>
+            <p>Our AI is decrypting security vectors...</p>
+        </div>
+
+        <div class="amount-badge">
+            ₹{{ amount }}
+        </div>
+
+        <div class="process-steps">
+            <div class="step active" id="step1">
+                <i class="fas fa-circle-notch fa-spin"></i>
+                <span>Verifying Biometrics...</span>
+            </div>
+            <div class="step" id="step2">
+                <i class="fas fa-microchip"></i>
+                <span>Scanning Patterns...</span>
+            </div>
+            <div class="step" id="step3">
+                <i class="fas fa-fingerprint"></i>
+                <span>ML Evaluation...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden form for backend processing -->
+    <form id="resultForm" action="/result-confirm" method="post" style="display: none;">
+        <input type="hidden" name="amount" value="{{ amount }}">
+        <input type="hidden" name="device" value="{{ device }}">
+        <input type="hidden" name="location" value="{{ location }}">
+        <input type="hidden" name="merchant" value="{{ merchant }}">
+        <input type="hidden" name="phone" value="{{ phone }}">
+        <input type="hidden" name="receiver" value="{{ receiver }}">
+        <input type="hidden" name="receiver_email" value="{{ receiver_email }}">
+        <input type="hidden" name="email" value="{{ email }}">
+        {% if txn_id %}
+        <input type="hidden" name="txn_id" value="{{ txn_id }}">
+        {% endif %}
+    </form>
+
+    <script>
+        // Simulate step transitions for better UX
+        const steps = ['step1', 'step2', 'step3'];
+        let currentStep = 0;
+
+        const stepInterval = setInterval(() => {
+            if (currentStep < steps.length - 1) {
+                const prevEl = document.getElementById(steps[currentStep]);
+                prevEl.classList.remove('active');
+                prevEl.querySelector('i').className = 'fas fa-check-circle';
+                prevEl.style.color = '#10b981';
+
+                currentStep++;
+                const nextEl = document.getElementById(steps[currentStep]);
+                nextEl.classList.add('active');
+                nextEl.querySelector('i').classList.add('fa-spin', 'fa-circle-notch');
+            } else {
+                clearInterval(stepInterval);
+            }
+        }, 800);
+
+        // Submit form after processing animation
+        setTimeout(function () {
+            var form = document.getElementById('resultForm');
+            if (form) form.submit();
+        }, 3000);
+    </script>
+</body>
+
+</html>

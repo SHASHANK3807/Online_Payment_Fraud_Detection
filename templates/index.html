@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Transaction - FraudGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="header">
+        <!-- User Profile Dropdown -->
+        <div class="user-profile-badge" id="profile-toggle">
+            <div class="user-avatar">{{ current_user.username[0]|upper if current_user.username else 'U' }}</div>
+            <div class="user-info">
+                <span class="user-name">{{ current_user.username }}</span>
+            </div>
+            <div class="dropdown-chevron">▼</div>
+
+            <!-- Hidden Dropdown Menu -->
+            <div class="user-dropdown-menu" id="profile-dropdown">
+                <div class="dropdown-header">
+                    <strong>{{ current_user.username }}</strong>
+                    <span>{{ current_user.upi_id or 'ID Not assigned' }}</span>
+                </div>
+                <a href="/history" class="dropdown-item">
+                    <i class="fas fa-history"></i> History
+                </a>
+                <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                </a>
+            </div>
+        </div>
+
+        <script>
+            const profileToggle = document.getElementById('profile-toggle');
+            const profileDropdown = document.getElementById('profile-dropdown');
+
+            profileToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileToggle.classList.toggle('show');
+                profileDropdown.classList.toggle('show');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!profileToggle.contains(e.target)) {
+                    profileToggle.classList.remove('show');
+                    profileDropdown.classList.remove('show');
+                }
+            });
+        </script>
+
+        <div class="header-content">
+            <div class="logo">💳</div>
+            <h1>Payment Portal</h1>
+            <p>Next-Gen Fraud Protection</p>
+        </div>
+    </div>
+
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2>💳 New Transaction</h2>
+                    <p>Enter payment details for AI risk evaluation</p>
+                </div>
+            </div>
+
+            <form action="/processing" method="post" class="form" id="payment-form">
+                <!-- Personal Information -->
+
+                <div class="form-section">
+                    <h3 style="color: var(--primary); font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px;">Account Security Profile</h3>
+
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="email">Registered Origin Profile *</label>
+                            <!-- Secure Data Masking for Demo Presentation -->
+                            <input type="text" id="email" name="email" value="{{ masked_email }}" readonly required style="cursor: not-allowed; opacity: 0.7; font-family: monospace;">
+                            <span class="form-hint"><i class="fas fa-lock"></i> Secured via End-to-End Encryption</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Details -->
+                <div class="form-section">
+                    <h3 style="color: var(--primary); font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px;">Transaction Details</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="amount">Amount (₹) *</label>
+                            <input type="number" id="amount" name="amount" placeholder="0.00" step="0.01"
+                                min="1" required>
+                            <span class="form-hint">Positive numeric value</span>
+                        </div>
+
+                        <div class="form-group" style="flex: 2;">
+                            <label for="receiver">Receiver's UPI ID *</label>
+                            <input type="text" id="receiver" name="receiver" placeholder="name@bankname" required>
+                            <span class="form-hint">Verify ID before proceeding</span>
+                        </div>
+
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="device">Device Type *</label>
+                            <select id="device" name="device" required>
+                                <option value="mobile">📱 Mobile Device</option>
+                                <option value="desktop">💻 Desktop Computer</option>
+                                <option value="tablet">📲 Tablet Device</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="merchant">Category *</label>
+                            <select id="merchant" name="merchant" required>
+                                <option value="retail">🛍️ Retail & Shopping</option>
+                                <option value="food">🍔 Food & Dining</option>
+                                <option value="travel">✈️ Travel & Transport</option>
+                                <option value="entertainment">🎬 Entertainment</option>
+                                <option value="utilities">💡 Utilities</option>
+                                <option value="healthcare">🏥 Healthcare</option>
+                                <option value="education">📚 Education</option>
+                                <option value="other">📦 Other Category</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <label for="location_display">Secure Location *</label>
+                            <a href="#" id="detect-location"
+                                style="font-size: 0.8em; color: var(--primary); text-decoration: none; font-weight: 700;">🔄 REFRESH</a>
+                        </div>
+                        <input type="text" id="location_display" placeholder="Verifying origin..." readonly
+                            style="cursor: not-allowed; opacity: 0.7;">
+                        <input type="hidden" id="location" name="location">
+                        <span class="form-hint" id="location-status">📍 Detecting via secure network lookup...</span>
+                    </div>
+
+
+                    <script>
+                        function detectLocation() {
+                            const link = document.getElementById('detect-location');
+                            const display = document.getElementById('location_display');
+                            const hidden = document.getElementById('location');
+                            const status = document.getElementById('location-status');
+
+                            link.innerText = '🔍 Checking...';
+                            status.innerText = '🛰️ Requesting precise GPS coordinates...';
+
+                            // Strategy 1: HTML5 Precise Geolocation
+                            if ("geolocation" in navigator) {
+                                navigator.geolocation.getCurrentPosition(
+                                    (position) => {
+                                        const lat = position.coords.latitude;
+                                        const lon = position.coords.longitude;
+                                        status.innerText = '🛰️ Coordinates found. Mapping to city...';
+
+                                        // Reverse Geocode using free BigDataCloud API
+                                        fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`)
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                const city = data.city || data.locality || "Unknown";
+                                                updateLocationUI(city, 'Precise GPS Verified');
+                                            })
+                                            .catch(() => fallbackToIP());
+                                    },
+                                    (error) => {
+                                        console.warn("GPS Access Denied/Failed:", error.message);
+                                        fallbackToIP();
+                                    },
+                                    { timeout: 5000 }
+                                );
+                            } else {
+                                fallbackToIP();
+                            }
+
+                            function fallbackToIP() {
+                                status.innerText = '📡 GPS unavailable. Falling back to secure IP lookup...';
+                                fetch('https://ipapi.co/json/')
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.city) {
+                                            updateLocationUI(data.city, 'IP Geolocation Verified');
+                                        } else {
+                                            throw new Error('City not found');
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.error('Location detection failed:', err);
+                                        display.value = 'Unknown';
+                                        hidden.value = 'other';
+                                        status.innerText = '❌ Detection failed. Please refresh.';
+                                        status.style.color = '#f56565';
+                                        link.innerText = '🔄 Retry';
+                                    });
+                            }
+
+                            function updateLocationUI(city, method) {
+                                display.value = city;
+                                hidden.value = city.toLowerCase();
+                                status.innerText = `✅ Success: ${city} (${method})`;
+                                status.style.color = '#48bb78';
+                                link.innerText = '🔄 Refresh';
+                            }
+                        }
+
+                        // Run on page load
+                        window.addEventListener('load', detectLocation);
+
+                        document.getElementById('detect-location').addEventListener('click', function (e) {
+                            e.preventDefault();
+                            detectLocation();
+                        });
+
+                        document.getElementById('payment-form').addEventListener('submit', async function (e) {
+                            e.preventDefault(); // Stop form submission for check
+
+                            const amount = parseFloat(document.getElementById('amount').value);
+                            const locationValue = document.getElementById('location').value;
+                            const receiverValue = document.getElementById('receiver').value;
+
+                            // 1. Prevent submission if location hasn't been detected yet
+                            if (!locationValue) {
+                                await showCustomAlert("Location Required", "Please wait for secure location verification before submitting your transaction.", "info");
+                                return;
+                            }
+
+                            // 2. NEW: Check Receiver Details & Reputation via API
+                            try {
+                                const response = await fetch('/api/check-receiver', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ receiver: receiverValue })
+                                });
+                                const reputation = await response.json();
+
+                                // Step A: Handle Registration/Amount Confirmation
+                                if (reputation.is_registered) {
+                                    const confirmPay = await showCustomConfirm(
+                                        "Payment Confirmation",
+                                        `You are about to pay ₹${amount.toLocaleString()} to <b>${reputation.receiver_username}</b>.<br><br>Do you want to continue?`,
+                                        "info"
+                                    );
+                                    if (!confirmPay) return;
+                                } else {
+                                    const confirmUnregistered = await showCustomConfirm(
+                                        "Unregistered Receiver",
+                                        "The specified ID is not registered with FraudGuard system, do you still want to continue?",
+                                        "alert"
+                                    );
+                                    if (!confirmUnregistered) return;
+                                }
+
+                                // Step B: Handle Scam/Reputation Alerts
+                                if (reputation.is_flagged) {
+                                    const proceed = await showCustomConfirm(
+                                        "🚨 SCAM ALERT!", 
+                                        `This receiver has a ${reputation.fraud_rate}% fraud rate (${reputation.fraud_count}/${reputation.total_count} transactions flagged).\n\nAre you ABSOLUTELY sure you want to send money to this potentially malicious account?`,
+                                        "danger"
+                                    );
+                                    if (!proceed) return;
+                                } else if (reputation.fraud_count > 0) {
+                                    const proceed = await showCustomConfirm(
+                                        "⚠️ CAUTION!",
+                                        `This receiver has a ${reputation.fraud_rate}% suspicious transaction rate in their history.\n\nDo you wish to proceed with the payment?`,
+                                        "alert"
+                                    );
+                                    if (!proceed) return;
+                                }
+
+                            } catch (err) {
+                                console.error("Reputation check failed:", err);
+                                // Continue if API fails to avoid blocking legitimate transactions
+                            }
+
+                            // 3. High Value Confirmation (Threshold check still applied for extra safety)
+                            const threshold = 5000;
+                            if (amount >= threshold) {
+                                const confirmed = await showCustomConfirm(
+                                    "💰 High Value Alert",
+                                    `You are about to pay ₹${amount.toLocaleString()}.\n\nPlease ensure you have entered the correct amount before proceeding.`,
+                                    "info",
+                                    "Continue",
+                                    "Cancel"
+                                );
+                                if (!confirmed) return;
+                            }
+
+                            // If all checks pass, submit the form manually
+                            this.submit();
+                        });
+
+                    </script>
+
+
+
+                </div>
+
+                <button type="submit" class="btn-submit">Verify Transaction →</button>
+
+                <div class="security-badge">
+                    <span>🔒 Encrypted</span>
+                    <span>🤖 AI-Powered</span>
+                    <span>⚡ Real-Time</span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Modal -->
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-container">
+            <span id="modalIcon" class="modal-icon"></span>
+            <h2 id="modalTitle" class="modal-title"></h2>
+            <p id="modalMessage" class="modal-message"></p>
+            <div id="modalFooter" class="modal-footer">
+                <button id="modalConfirmBtn" class="modal-btn modal-btn-confirm">OK</button>
+                <button id="modalCancelBtn" class="modal-btn modal-btn-cancel" style="display: none;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showCustomAlert(title, message, iconType = 'info') {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customModal');
+                const icon = document.getElementById('modalIcon');
+                const titleEl = document.getElementById('modalTitle');
+                const msgEl = document.getElementById('modalMessage');
+                const confirmBtn = document.getElementById('modalConfirmBtn');
+                const cancelBtn = document.getElementById('modalCancelBtn');
+
+                const icons = { 'info': 'ℹ️', 'alert': '⚠️', 'danger': '🚨', 'success': '✅' };
+                const iconClasses = { 'info': 'modal-icon-info', 'alert': 'modal-icon-alert', 'danger': 'modal-icon-danger', 'success': 'modal-icon-success' };
+
+                icon.textContent = icons[iconType] || icons.info;
+                icon.className = 'modal-icon ' + (iconClasses[iconType] || '');
+                titleEl.textContent = title;
+                msgEl.innerText = message;
+                confirmBtn.textContent = 'OK';
+                cancelBtn.style.display = 'none';
+
+                modal.classList.add('active');
+
+                confirmBtn.onclick = () => {
+                    modal.classList.remove('active');
+                    resolve(true);
+                };
+            });
+        }
+
+        function showCustomConfirm(title, message, iconType = 'alert', confirmText = 'Yes', cancelText = 'No') {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customModal');
+                const icon = document.getElementById('modalIcon');
+                const titleEl = document.getElementById('modalTitle');
+                const msgEl = document.getElementById('modalMessage');
+                const confirmBtn = document.getElementById('modalConfirmBtn');
+                const cancelBtn = document.getElementById('modalCancelBtn');
+
+                const icons = { 'info': 'ℹ️', 'alert': '⚠️', 'danger': '🚨', 'success': '✅' };
+                const iconClasses = { 'info': 'modal-icon-info', 'alert': 'modal-icon-alert', 'danger': 'modal-icon-danger', 'success': 'modal-icon-success' };
+
+                icon.textContent = icons[iconType] || icons.alert;
+                icon.className = 'modal-icon ' + (iconClasses[iconType] || '');
+                titleEl.textContent = title;
+                msgEl.innerHTML = message;
+                confirmBtn.textContent = confirmText;
+                cancelBtn.textContent = cancelText;
+                cancelBtn.style.display = 'block';
+
+                modal.classList.add('active');
+
+                confirmBtn.onclick = () => {
+                    modal.classList.remove('active');
+                    resolve(true);
+                };
+
+                cancelBtn.onclick = () => {
+                    modal.classList.remove('active');
+                    resolve(false);
+                };
+            });
+        }
+    </script>
+</body>
+
+</html>

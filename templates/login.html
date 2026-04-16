@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Access | FraudGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <style>
+        .auth-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 50px 40px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-error {
+            background: rgba(244, 63, 94, 0.1);
+            color: #fb7185;
+            border: 1px solid rgba(244, 63, 94, 0.2);
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            transition: color 0.3s ease;
+        }
+
+        .input-wrapper input {
+            padding-left: 50px;
+        }
+
+        .input-wrapper input:focus + i {
+            color: var(--primary);
+        }
+
+        .auth-footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body class="auth-body">
+    <div class="auth-container" style="max-width: 420px; position: relative;">
+        <!-- Back to Home Button -->
+        <a href="{{ url_for('index') }}" style="position: absolute; top: -50px; left: 0; color: #94a3b8; text-decoration: none; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: color 0.3s ease;">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+        <div class="auth-card">
+            <div class="auth-header" style="text-align: center;">
+                <div class="auth-icon">
+                    <i class="fas fa-user-lock"></i>
+                </div>
+                <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 10px;">Welcome Back</h1>
+                <p style="font-size: 0.95rem; color: #94a3b8; margin-bottom: 35px;">Authorize to access secure portal</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert {% if category == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                <i class="fas {% if category == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i> {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('login') }}" method="POST" class="auth-form" autocomplete="off">
+                <div class="input-group">
+                    <label>IDENTIFICATION</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="username" placeholder="Enter username" autocomplete="off" required>
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>PASSKEY</label>
+                    <div class="input-wrapper">
+                        <input type="password" name="password" placeholder="••••••••" autocomplete="new-password" required>
+                        <i class="fas fa-key"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-premium">
+                    <i class="fas fa-sign-in-alt"></i> AUTHORIZE SESSION
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>New to FraudGuard? <a href="{{ url_for('register') }}">Create account</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

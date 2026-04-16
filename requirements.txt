@@ -1,0 +1,10 @@
+flask
+scikit-learn
+pandas
+numpy
+xgboost
+flask-sqlalchemy
+pymysql
+python-dotenv
+flask-login
+flask-mail

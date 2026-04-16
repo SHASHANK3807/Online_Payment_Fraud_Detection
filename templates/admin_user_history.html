@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operative Profile | FraudGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <style>
+        .admin-history-container {
+            max-width: 1200px;
+        }
+
+        .user-meta-grid {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .meta-tag {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .back-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-nav:hover {
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">👤</div>
+            <h1>Operative Dossier</h1>
+            <p>Intelligence report for: <span style="color: white; font-weight: 800;">{{ user.username }}</span></p>
+            <div class="user-meta-grid">
+                <span class="meta-tag"><i class="fas fa-fingerprint" style="margin-right: 8px;"></i> {{ user.email }}</span>
+                <span class="meta-tag"><i class="fas fa-database" style="margin-right: 8px;"></i> {{ transactions|length }} Records</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container admin-history-container" style="max-width: 1200px;">
+        <a href="/admin" class="back-nav">
+            <i class="fas fa-chevron-left"></i> BACK TO DIRECTORY
+        </a>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Forensic Transaction Log</h2>
+                <p>Behavioral trail analyzed by ML Neural Network</p>
+            </div>
+
+            <div style="padding: 30px;">
+                {% if transactions %}
+                <div style="overflow-x: auto;">
+                    <table class="txn-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Sum</th>
+                                <th>Recipient</th>
+                                <th>Origin</th>
+                                <th>Hardware</th>
+                                <th>Status Outcome</th>
+                                <th>Threat %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for txn in transactions %}
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 600; color: white;">{{ txn.timestamp.strftime('%d %b %Y') }}</div>
+                                    <div style="font-size: 0.75rem; color: #64748b;">{{ txn.timestamp.strftime('%H:%M') }}</div>
+                                </td>
+                                <td>
+                                    <span style="font-weight: 800; color: white;">₹{{ txn.amount }}</span>
+                                </td>
+                                <td>
+                                    <span style="font-family: monospace; font-size: 0.85rem; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">{{ txn.receiver }}</span>
+                                </td>
+                                <td>
+                                    <span style="font-size: 0.85rem;"><i class="fas fa-map-marker-alt" style="margin-right: 5px; font-size: 0.7rem;"></i> {{ txn.location|capitalize }}</span>
+                                </td>
+                                <td>
+                                    <span style="font-size: 0.85rem; color: #94a3b8;">{{ txn.device|capitalize }} / {{ txn.merchant|capitalize }}</span>
+                                </td>
+                                <td>
+                                    <span class="status-badge 
+                                        {% if txn.prediction == 'Fraudulent' %}status-fraud
+                                        {% elif 'Verification' in txn.prediction %}status-warning
+                                        {% else %}status-success{% endif %}">
+                                        {{ txn.prediction }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 800; font-size: 0.9rem; color: {% if txn.fraud_probability > 70 %}var(--danger){% elif txn.fraud_probability > 40 %}var(--warning){% else %}var(--accent){% endif %};">
+                                        {{ txn.fraud_probability }}%
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 80px 20px; color: #64748b;">
+                    <i class="fas fa-ghost" style="font-size: 4rem; margin-bottom: 25px; opacity: 0.3;"></i>
+                    <h3>Zero Activity Detected</h3>
+                    <p>This identification handle has no recorded transaction history.</p>
+                </div>
+                {% endif %}
+
+                <div style="margin-top: 40px; text-align: center;">
+                    <a href="/admin" class="btn-premium" style="display: inline-flex; width: auto; padding: 15px 40px;">
+                        <i class="fas fa-users" style="margin-right: 12px;"></i> DIRECTORY RETURN
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

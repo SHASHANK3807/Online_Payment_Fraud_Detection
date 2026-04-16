@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Center | FraudGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <style>
+        .admin-container {
+            max-width: 1100px;
+        }
+
+        .stat-card i {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        .user-table-card {
+            margin-top: 40px;
+        }
+
+        .user-row {
+            transition: all 0.2s ease;
+        }
+
+        .user-row:hover {
+            background: rgba(255, 255, 255, 0.04) !important;
+            cursor: pointer;
+        }
+
+        .avatar-small {
+            width: 38px;
+            height: 38px;
+            background: var(--primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: #94a3b8;
+            padding: 8px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .btn-action:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">⚡</div>
+            <h1>Command Center</h1>
+            <p>Global Intelligence & User Monitoring</p>
+        </div>
+    </div>
+
+    <div class="container admin-container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <div class="stat-label">Total Operatives</div>
+                <div class="stat-value">{{ stats.total_users }}</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-microchip"></i>
+                <div class="stat-label">Neural Scans</div>
+                <div class="stat-value">{{ stats.total_txns }}</div>
+            </div>
+            <div class="stat-card" style="border-color: rgba(244, 63, 94, 0.2);">
+                <i class="fas fa-shield-virus" style="color: var(--danger);"></i>
+                <div class="stat-label">Threats Terminated</div>
+                <div class="stat-value" style="color: var(--danger);">{{ stats.total_fraud }}</div>
+            </div>
+            <div class="stat-card" style="border-color: rgba(16, 185, 129, 0.2);">
+                <i class="fas fa-check-double" style="color: var(--accent);"></i>
+                <div class="stat-label">System Health</div>
+                <div class="stat-value" style="color: var(--accent);">99.9%</div>
+            </div>
+        </div>
+
+        <div class="card user-table-card">
+            <div class="card-header">
+                <h2>User Directory</h2>
+                <p>Real-time monitoring of all registered identification handles</p>
+            </div>
+
+            <div style="padding: 30px;">
+                <div style="overflow-x: auto;">
+                    <table class="txn-table">
+                        <thead>
+                            <tr>
+                                <th>Operative</th>
+                                <th>Activity</th>
+                                <th>Total Vol.</th>
+                                <th>Threat Flags</th>
+                                <th>Resolution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr class="user-row" onclick="window.location='/admin/user/{{ user.email }}'">
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 15px;">
+                                        <div class="avatar-small">{{ user.username[0]|upper }}</div>
+                                        <div>
+                                            <div style="font-weight: 700; color: white; font-size: 0.95rem;">{{ user.username }}</div>
+                                            <div style="font-size: 0.8rem; color: #64748b; font-family: monospace;">{{ user.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 700; color: #94a3b8;">{{ user.txn_count }} <span style="font-size: 0.75rem; font-weight: 400;">scans</span></div>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 700; color: white;">₹{{ user.total_spent }}</div>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px; color: {% if user.fraud_count > 0 %}var(--danger){% else %}#334155{% endif %}; font-weight: 800;">
+                                        <i class="fas fa-radiation" style="font-size: 0.8rem;"></i>
+                                        {{ user.fraud_count }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="/admin/user/{{ user.email }}" class="btn-action" onclick="event.stopPropagation()">
+                                        ANALYZE <i class="fas fa-search" style="margin-left: 5px; font-size: 0.7rem;"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 40px; text-align: center;">
+                    <a href="/logout" style="color: var(--danger); text-decoration: none; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.1em;">
+                        SIGN OUT <i class="fas fa-power-off" style="margin-left: 8px;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

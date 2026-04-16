@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pause State | FraudGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    
+    <style>
+        .pending-container {
+            max-width: 550px;
+        }
+
+        .clock-scanner {
+            font-size: 5rem;
+            margin-bottom: 30px;
+            color: var(--warning);
+            position: relative;
+            display: inline-block;
+            animation: pulse-ring 2s infinite ease-out;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.4)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.7)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.4)); }
+        }
+
+        .protocol-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            border-radius: 24px;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .protocol-step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .protocol-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+        }
+
+        .step-info h4 {
+            font-size: 0.9rem;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .step-info p {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">⏸️</div>
+            <h1>Transaction Paused</h1>
+            <p>Authorization Buffer Initiated</p>
+        </div>
+    </div>
+
+    <div class="container pending-container">
+        <div class="card" style="padding: 60px 40px; text-align: center;">
+            <div class="clock-scanner">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            
+            <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 15px;">Pending Co-Signer</h2>
+            
+            <div class="status-badge status-warning">
+                <i class="fas fa-user-clock" style="margin-right: 8px;"></i> AWAITING GUARDIAN NODES
+            </div>
+
+            <p style="margin: 25px 0; font-size: 0.95rem; color: #94a3b8; line-height: 1.7;">
+                To secure your assets during this high-volume transfer of <strong style="color: white;">₹{{ "{:,.2f}".format(amount) }}</strong>, 
+                our neural filter has paused the operation until verified by your trusted network.
+            </p>
+
+            <div class="protocol-box">
+                <h3 style="color: var(--warning); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.2rem; margin-bottom: 25px;">NEXT STEPS</h3>
+                
+                <div class="protocol-step">
+                    <div class="step-icon"><i class="fas fa-paper-plane"></i></div>
+                    <div class="step-info">
+                        <h4>Transmission Sent</h4>
+                        <p>A secure verification link has been transmitted to: <strong style="color: white;">{{ trusted_contact }}</strong></p>
+                    </div>
+                </div>
+
+                <div class="protocol-step">
+                    <div class="step-icon"><i class="fas fa-key"></i></div>
+                    <div class="step-info">
+                        <h4>Guardian Review</h4>
+                        <p>Your trusted contact must authorize the cryptographic settlement via the provided portal.</p>
+                    </div>
+                </div>
+
+                <div class="protocol-step">
+                    <div class="step-icon"><i class="fas fa-clipboard-check"></i></div>
+                    <div class="step-info">
+                        <h4>Finalization</h4>
+                        <p>Once approved, the ledger entry will move to verified state in your <a href="/history" style="color: var(--primary); text-decoration: none; font-weight: 700;">Activity History</a>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px;">
+                <a href="/transaction" class="btn-premium" style="height: 60px; font-size: 1rem;">
+                    RETURN TO PORTAL <i class="fas fa-chevron-right" style="margin-left: 10px;"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

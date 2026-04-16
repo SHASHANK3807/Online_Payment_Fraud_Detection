@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identity Challenge | FraudGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <style>
+        .otp-wrapper {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 35px 0;
+        }
+
+        .otp-input {
+            width: 65px;
+            height: 75px;
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .otp-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        .verification-shield {
+            font-size: 4rem;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.3)); }
+            50% { filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.6)); }
+        }
+
+        .error-alert {
+            background: rgba(244, 63, 94, 0.1);
+            color: #fb7185;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(244, 63, 94, 0.2);
+        }
+
+        .amount-summary {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">🛡️</div>
+            <h1>Identity Challenge</h1>
+            <p>Cryptographic Authentication Required</p>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 500px;">
+        <div class="card" style="padding: 50px 40px; text-align: center;">
+            <div class="verification-shield">
+                <i class="fas fa-shield-halved"></i>
+            </div>
+            
+            <h2 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 10px;">Authorize Settlement</h2>
+            <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">
+                A unique 4-digit synchronization code has been transmitted to your secure address.
+            </p>
+
+            <div class="amount-summary">
+                <i class="fas fa-receipt" style="font-size: 0.8rem;"></i>
+                Sum: <span style="color: white; font-weight: 800;">₹{{ "{:,.2f}".format(amount) }}</span>
+            </div>
+
+            {% if error %}
+            <div class="error-alert">
+                <i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <form id="otpForm" method="POST">
+                <div class="otp-wrapper">
+                    <input type="text" maxlength="1" class="otp-input" required autocomplete="off" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-input" required autocomplete="off" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-input" required autocomplete="off" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-input" required autocomplete="off" inputmode="numeric">
+                </div>
+
+                <input type="hidden" name="otp" id="combinedOtp">
+
+                <button type="submit" class="btn-premium" style="height: 65px;">
+                    CONFIRM & AUTHORIZE <i class="fas fa-key" style="margin-left: 12px; font-size: 0.9rem;"></i>
+                </button>
+            </form>
+
+            <div style="margin-top: 35px; font-size: 0.85rem; color: #64748b;">
+                Retry transmission? <a href="#" style="color: var(--primary); font-weight: 700; text-decoration: none;">RESEND CODE</a>
+                <br><br>
+                <a href="/transaction" style="color: rgba(244, 63, 94, 0.6); text-decoration: none; font-weight: 700; letter-spacing: 0.05em;">
+                    <i class="fas fa-times" style="margin-right: 5px;"></i> TERMINATE TRANSACTION
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputs = document.querySelectorAll('.otp-input');
+        const hiddenInput = document.getElementById('combinedOtp');
+        const form = document.getElementById('otpForm');
+
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                if (value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+                updateHiddenValue();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('paste', (e) => {
+                const data = e.clipboardData.getData('text').trim();
+                if (data.length === 4 && /^\d+$/.test(data)) {
+                    for (let i = 0; i < 4; i++) {
+                        inputs[i].value = data[i];
+                    }
+                    updateHiddenValue();
+                }
+            });
+        });
+
+        function updateHiddenValue() {
+            let otp = '';
+            inputs.forEach(input => otp += input.value);
+            hiddenInput.value = otp;
+        }
+
+        form.addEventListener('submit', (e) => {
+            updateHiddenValue();
+            if (hiddenInput.value.length !== 4) {
+                e.preventDefault();
+                alert('Please enter complete synchronization code');
+            }
+        });
+
+        inputs[0].focus();
+    </script>
+</body>
+
+</html>

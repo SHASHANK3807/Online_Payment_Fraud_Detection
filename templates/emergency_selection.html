@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identity Challenge | FraudGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <style>
+        .selection-card {
+            max-width: 550px;
+            padding: 50px 40px;
+        }
+
+        .option-tile {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            text-align: left;
+        }
+
+        .option-tile:hover {
+            background: rgba(99, 102, 241, 0.05);
+            border-color: var(--primary);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .option-icon {
+            width: 65px;
+            height: 65px;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .option-tile:hover .option-icon {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .option-text h3 {
+            font-size: 1.1rem;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .option-text p {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .emergency-header i {
+            font-size: 4rem;
+            color: var(--danger);
+            margin-bottom: 25px;
+            filter: drop-shadow(0 0 15px rgba(244, 63, 94, 0.3));
+        }
+    </style>
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="card selection-card" style="text-align: center;">
+            <div class="emergency-header">
+                <i class="fas fa-biohazard"></i>
+                <h2 style="font-size: 1.8rem; font-weight: 800;">Identity Challenge</h2>
+                <p style="color: #94a3b8; margin-top: 15px; font-size: 0.95rem; line-height: 1.6;">
+                    Neural analysis indicates high-risk activity. Select an authorization protocol to bypass the blockade.
+                </p>
+            </div>
+
+            <div class="option-tile" onclick="window.location.href='{{ url_for('verify_challenge', txn_id=txn_id) }}'">
+                <div class="option-icon"><i class="fas fa-fingerprint"></i></div>
+                <div class="option-text">
+                    <h3>Secret Passphrase</h3>
+                    <p>Authorize via the cryptographic security question established during node initialization.</p>
+                </div>
+            </div>
+
+            <div class="option-tile" onclick="window.location.href='{{ url_for('initiate_emergency_dual_otp', txn_id=txn_id) }}'">
+                <div class="option-icon"><i class="fas fa-network-wired"></i></div>
+                <div class="option-text">
+                    <h3>Dual-Node Sync</h3>
+                    <p>Simultaneous verification across yours and your guardian's terminal endpoints.</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <a href="/transaction" style="color: #64748b; text-decoration: none; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em;">
+                    <i class="fas fa-arrow-left" style="margin-right: 8px;"></i> ABORT MISSION
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
