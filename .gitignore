@@ -1,1 +1,19 @@
+# Virtual environment
 venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# ML models / large files
+*.pkl
+
+# Debug files
+*.txt
+
+# OS files
+.DS_Store
+Thumbs.db
