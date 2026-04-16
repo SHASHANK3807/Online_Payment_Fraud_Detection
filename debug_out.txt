@@ -1,0 +1,88 @@
+
+
+
+
+
+Transaction Resolution - FraudGuard
+
+
+
+
+
+
+
+
+T
+
+tc_senior
+
+▼
+
+
+
+tc_senior
+tc_senior@fraudguard
+
+
+ New Transaction
+                
+
+ History
+                
+
+ Sign Out
+                
+
+
+
+
+🛰️
+Neural Resolution
+Verification Finalized
+
+
+
+
+
+
+❌
+Validation Error
+Input data synchronization failed
+
+
+
+                    ❌ Phone Error: Invalid phone prefix (must start with 6-9)
+                
+
+🔍 Error Diagnostics
+
+
+
+Amount: Valid amount ₹25,000
+                        
+
+
+Phone: Invalid phone prefix (must start with 6-9)
+                        
+
+
+Email:
+
+
+
+Upi:
+
+
+
+Location:
+
+
+
+
+Retry Input
+View Ledger
+
+
+
+
+
